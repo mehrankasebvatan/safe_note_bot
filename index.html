@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html class="dark" dir="rtl" lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>یادداشت‌ها</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<style>
+html,body{width:100%;margin:0;padding:0;background:rgb(var(--c-surface));color:rgb(var(--c-on-surface));-webkit-tap-highlight-color:transparent}html.light{color-scheme:light}
+html[lang=en] :not(.material-symbols-outlined){font-family:'Plus Jakarta Sans','Vazirmatn',sans-serif}
+body{overscroll-behavior:none;font-family:'Vazirmatn','Plus Jakarta Sans',sans-serif;min-height:100dvh}
+.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px)}.pt-safe{padding-top:env(safe-area-inset-top,0px)}
+::-webkit-scrollbar{display:none}
+.material-symbols-outlined{font-variation-settings:'FILL' 0}
+textarea,input{font-family:inherit}
+</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+
+  (function () {
+  if (window.Telegram && Telegram.WebApp) return;
+  let ip = {};
+  try {
+    const P = new URLSearchParams(location.hash.slice(1));
+    if (P.get('tgWebAppVersion') || P.get('tgWebAppData')) { ip = Object.fromEntries(P); sessionStorage.setItem('__tgp', JSON.stringify(ip)); }
+    else ip = JSON.parse(sessionStorage.getItem('__tgp') || '{}');
+  } catch (e) {}
+  const inFrame = window.parent !== window;
+  const hasBridge = !!(window.TelegramWebviewProxy || (window.external && 'notify' in window.external) || inFrame);
+  const H = {}, R = {}, L = {}; let rid = 0;
+  const on = (t, f) => (H[t] = H[t] || []).push(f);
+  const once = (t, f) => { const g = d => { H[t] = (H[t] || []).filter(x => x !== g); f(d); }; on(t, g); };
+  const fire = (n, d) => (L[n] || []).slice().forEach(f => { try { f(d); } catch (e) {} });
+  function post(t, d) {
+    d = d || {};
+    try {
+      if (window.TelegramWebviewProxy) TelegramWebviewProxy.postEvent(t, JSON.stringify(d));
+      else if (window.external && 'notify' in window.external) window.external.notify(JSON.stringify({ eventType: t, eventData: d }));
+      else if (inFrame) window.parent.postMessage(JSON.stringify({ eventType: t, eventData: d }), '*');
+    } catch (e) {}
+  }
+  function recv(t, d) { if (typeof d === 'string') { try { d = JSON.parse(d); } catch (e) {} } (H[t] || []).slice().forEach(f => { try { f(d); } catch (e) {} }); }
+  window.Telegram = window.Telegram || {};
+  Telegram.WebView = { receiveEvent: recv, initParams: ip };
+  window.addEventListener('message', e => { if (e.source !== window.parent) return; try { const m = JSON.parse(e.data); recv(m.eventType, m.eventData); } catch (x) {} });
+  const ver = ip.tgWebAppVersion || '6.0';
+  const atLeast = v => { const a = ver.split('.').map(Number), b = String(v).split('.').map(Number); for (let i = 0; i < 3; i++) { const x = a[i] || 0, y = b[i] || 0; if (x !== y) return x > y; } return true; };
+  function call(method, params, cb) {
+    const id = 'r' + (++rid);
+    const t = setTimeout(() => { delete R[id]; cb('TIMEOUT'); }, 8000);
+    R[id] = r => { clearTimeout(t); cb(r.error || null, r.result); };
+    post('web_app_invoke_custom_method', { req_id: id, method, params: params || {} });
+  }
+  on('custom_method_invoked', d => { const f = R[d && d.req_id]; if (f) { delete R[d.req_id]; f(d); } });
+  let tp = {}; try { tp = JSON.parse(ip.tgWebAppThemeParams || '{}'); } catch (e) {}
+  const scheme = () => {
+    const c = (tp.bg_color || '').replace('#', '');
+    if (c.length === 6) { const l = (parseInt(c.slice(0, 2), 16) * 299 + parseInt(c.slice(2, 4), 16) * 587 + parseInt(c.slice(4, 6), 16) * 114) / 1000; return l < 128 ? 'dark' : 'light'; }
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+  const unsafe = {};
+  try { for (const [k, v] of new URLSearchParams(ip.tgWebAppData || '')) { try { unsafe[k] = (k === 'user' || k === 'receiver' || k === 'chat') ? JSON.parse(v) : v; } catch (e) { unsafe[k] = v; } } } catch (e) {}
+  const W = {
+    hasBridge, version: ver, platform: ip.tgWebAppPlatform || 'unknown', initData: ip.tgWebAppData || '', initDataUnsafe: unsafe,
+    themeParams: tp, colorScheme: scheme(), isVersionAtLeast: atLeast,
+    ready: () => post('web_app_ready'), expand: () => post('web_app_expand'), close: () => post('web_app_close'),
+    setHeaderColor: c => atLeast('6.9') && post('web_app_set_header_color', { color: c }),
+    setBackgroundColor: c => atLeast('6.1') && post('web_app_set_background_color', { color: c }),
+    onEvent: (n, f) => (L[n] = L[n] || []).push(f),
+    HapticFeedback: { impactOccurred: s => atLeast('6.1') && post('web_app_trigger_haptic_feedback', { type: 'impact', impact_style: s || 'light' }) },
+    BackButton: { show: () => post('web_app_setup_back_button', { is_visible: true }), hide: () => post('web_app_setup_back_button', { is_visible: false }), onClick: f => on('back_button_pressed', f) },
+    openLink: u => hasBridge ? post('web_app_open_link', { url: u }) : window.open(u, '_blank'),
+    openTelegramLink: u => hasBridge ? post('web_app_open_tg_link', { path_full: String(u).replace(/^https?:\/\/t\.me\//, '') }) : window.open(u, '_blank'),
+    openInvoice: (u, cb) => {
+      const m = String(u).match(/invoice\/([^/?#]+)/) || String(u).match(/\$([A-Za-z0-9_-]+)/);
+      if (!m || !hasBridge) throw new Error('invoice');
+      once('invoice_closed', d => cb && cb(d.status)); post('web_app_open_invoice', { slug: m[1] });
+    },
+    showAlert: (m, cb) => { if (!hasBridge || !atLeast('6.2')) { alert(m); cb && cb(); return; } once('popup_closed', () => cb && cb()); post('web_app_open_popup', { message: m, buttons: [{ type: 'close' }] }); },
+    showConfirm: (m, cb) => { if (!hasBridge || !atLeast('6.2')) { cb(confirm(m)); return; } once('popup_closed', d => cb(!!d && d.button_id === 'ok')); post('web_app_open_popup', { message: m, buttons: [{ id: 'ok', type: 'ok' }, { type: 'cancel' }] }); },
+    CloudStorage: {
+      setItem: (k, v, cb) => call('saveStorageValue', { key: k, value: v }, (e, r) => cb && cb(e, r === true)),
+      getItems: (ks, cb) => call('getStorageValues', { keys: ks }, (e, r) => cb && cb(e, r)),
+      getKeys: cb => call('getStorageKeys', {}, (e, r) => cb && cb(e, r)),
+      removeItems: (ks, cb) => call('deleteStorageValues', { keys: ks }, (e, r) => cb && cb(e, r === true))
+    }
+  };
+  on('theme_changed', d => { tp = (d && d.theme_params) || {}; W.themeParams = tp; W.colorScheme = scheme(); fire('themeChanged'); });
+  Telegram.WebApp = W;
+  post('web_app_request_theme');
+})();
+const TN='surface surface-dim surface-variant surface-container-lowest surface-container-low surface-container surface-container-high surface-container-highest surface-bright on-surface on-surface-variant outline outline-variant primary on-primary primary-container on-primary-container secondary on-secondary secondary-container secondary-fixed-dim tertiary on-tertiary tertiary-container on-tertiary-container error error-container on-error-container'.split(' ');
+const TD='11 19 38|11 19 38|45 52 73|6 14 32|19 27 46|23 31 51|34 42 61|45 52 73|49 57 77|218 226 253|190 200 210|136 146 155|62 72 80|137 206 255|0 52 77|42 171 238|0 60 88|78 222 163|0 56 36|0 165 114|78 222 163|255 185 95|71 42 0|225 144 0|81 49 0|255 180 171|147 0 10|255 218 214'.split('|');
+const TL='248 250 252|248 250 252|226 232 240|233 238 244|241 245 249|255 255 255|233 238 245|226 232 240|255 255 255|15 23 42|71 85 105|100 116 139|203 213 225|36 129 204|255 255 255|42 171 238|0 60 88|5 150 105|255 255 255|16 185 129|4 120 87|180 83 9|255 255 255|251 191 36|69 26 3|220 38 38|254 226 226|153 27 27'.split('|');
+const TC=Object.fromEntries(TN.map(n=>[n,`rgb(var(--c-${n}) / <alpha-value>)`]));
+document.head.insertAdjacentHTML('beforeend',`<style>:root{${TN.map((n,i)=>`--c-${n}:${TD[i]}`).join(';')}}html.light{${TN.map((n,i)=>`--c-${n}:${TL[i]}`).join(';')}}</style>`);
+function applyTheme(){
+  let t='dark';try{t=localStorage.getItem('theme')||'dark'}catch(e){}
+  const w=window.Telegram&&Telegram.WebApp;
+  const sys=(w&&w.colorScheme)||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  const dark=t==='dark'||(t==='system'&&sys==='dark');
+  document.documentElement.classList.toggle('light',!dark);document.documentElement.classList.toggle('dark',dark);
+  try{w.setHeaderColor(dark?'#0b1326':'#f8fafc');w.setBackgroundColor(dark?'#0b1326':'#f8fafc')}catch(e){}
+}
+let L='fa';
+function applyLang(l){if(l)L=l;else{try{L=localStorage.getItem('lang')||'fa'}catch(e){}}const h=document.documentElement;h.lang=L;h.dir=L==='fa'?'rtl':'ltr';}
+applyLang();
+applyTheme();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
+tailwind.config={darkMode:"class",theme:{extend:{colors:TC,borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"space-lg":"1rem","margin":"1rem","space-xl":"1.5rem","space-sm":"0.5rem","gutter":"0.75rem","space-md":"0.75rem","space-xs":"0.25rem"},fontFamily:{"body-md":["Vazirmatn","Plus Jakarta Sans"],"headline-lg-mobile":["Vazirmatn","Plus Jakarta Sans"],"body-lg":["Vazirmatn","Plus Jakarta Sans"],"label-sm":["Vazirmatn","JetBrains Mono"],"headline-md":["Vazirmatn","Plus Jakarta Sans"],"headline-sm":["Vazirmatn","Plus Jakarta Sans"],"body-sm":["Vazirmatn","Plus Jakarta Sans"],"label-md":["Vazirmatn","Plus Jakarta Sans"]},fontSize:{"body-md":["14px",{lineHeight:"24px",fontWeight:"400"}],"headline-lg-mobile":["22px",{lineHeight:"34px",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"28px",fontWeight:"400"}],"label-sm":["11px",{lineHeight:"16px",fontWeight:"500"}],"headline-md":["18px",{lineHeight:"28px",fontWeight:"600"}],"headline-sm":["16px",{lineHeight:"26px",fontWeight:"600"}],"body-sm":["12px",{lineHeight:"20px",fontWeight:"400"}],"label-md":["12px",{lineHeight:"18px",fontWeight:"500"}]}}}}
+</script>
+</head>
+<body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col selection:bg-primary selection:text-on-primary">
+<div id="app"></div>
+<script>
+
+const tg = window.Telegram && Telegram.WebApp;
+try { tg.ready(); tg.expand(); applyTheme(); tg.onEvent('themeChanged', applyTheme); } catch (e) {}
+const hap = t => { try { tg.HapticFeedback.impactOccurred(t || 'light'); } catch (e) {} };
+const cloud = !!(tg && tg.hasBridge && tg.CloudStorage && tg.isVersionAtLeast('6.9'));
+
+const CS = cloud ? {
+  keys: () => new Promise((r, j) => tg.CloudStorage.getKeys((e, k) => e ? j(e) : r(k || []))),
+  get: ks => new Promise((r, j) => ks.length ? tg.CloudStorage.getItems(ks, (e, v) => e ? j(e) : r(v || {})) : r({})),
+  set: (k, v) => new Promise((r, j) => tg.CloudStorage.setItem(k, v, e => e ? j(e) : r())),
+  del: ks => new Promise(r => ks.length ? tg.CloudStorage.removeItems(ks, () => r()) : r())
+} : { 
+  keys: async () => Object.keys(localStorage).filter(k => k.startsWith('cs:')).map(k => k.slice(3)),
+  get: async ks => Object.fromEntries(ks.map(k => [k, localStorage.getItem('cs:' + k) || ''])),
+  set: async (k, v) => localStorage.setItem('cs:' + k, v),
+  del: async ks => ks.forEach(k => localStorage.removeItem('cs:' + k))
+};
+const SZ = 2000, cc = {}, Q = {};
+function split(s) { const p = []; let i = 0; while (i < s.length) { let e = Math.min(i + SZ, s.length); if (e < s.length && /[\ud800-\udbff]/.test(s[e - 1])) e--; p.push(s.slice(i, e)); i = e; } return p.length ? p : ['']; }
+async function _put(p, o) {
+  const parts = split(JSON.stringify(o));
+  for (let i = 0; i < parts.length; i++) await CS.set(p + '_' + i, parts[i]);
+  const old = cc[p] || 0;
+  if (old > parts.length) await CS.del(Array.from({ length: old - parts.length }, (_, i) => p + '_' + (parts.length + i)));
+  cc[p] = parts.length;
+}
+function put(p, o) {
+  if (S.fail) { sync('err'); return Promise.resolve(); }
+  sync('s');
+  return Q[p] = (Q[p] || Promise.resolve()).then(() => _put(p, o)).then(() => { S.em = ''; sync('ok'); }, e => { S.em = String((e && e.message) || e); sync('err'); });
+}
+const rm = p => { const n = cc[p] || 1; delete cc[p]; return CS.del(Array.from({ length: n }, (_, i) => p + '_' + i)); };
+async function load() {
+  const ks = await CS.keys(), vals = {}, g = {};
+  for (let i = 0; i < ks.length; i += 40) Object.assign(vals, await CS.get(ks.slice(i, i + 40)));
+  ks.forEach(k => { const m = k.match(/^(.+)_(\d+)$/); if (m) (g[m[1]] = g[m[1]] || {})[m[2]] = vals[k]; });
+  const notes = []; let tasks = S.tasks, cfg = S.cfg;
+  for (const p in g) {
+    const n = Object.keys(g[p]).length; cc[p] = n; let s = '';
+    for (let i = 0; i < n; i++) s += g[p][i] || '';
+    try { const o = JSON.parse(s); if (p === 'cfg') cfg = o; else if (p === 'tasks') tasks = o; else if (p[0] === 'n') notes.push(o); } catch (e) {}
+  }
+  S.notes = notes; S.tasks = tasks; S.cfg = cfg;
+  if (cfg.lang) { try { localStorage.setItem('lang', cfg.lang); } catch (e) {} applyLang(cfg.lang); }
+  if (cfg.theme) { try { localStorage.setItem('theme', cfg.theme); } catch (e) {} applyTheme(); }
+}
+
+
+const S = { v: 'notes', notes: [], tasks: [], cfg: {}, q: '', f: 'all', tf: 'all', pr: 'normal', draft: '', cur: null, ready: false, st: 'ok', unlocked: false, pf: null };
+const $ = s => document.querySelector(s);
+const TXT = {
+  fa: { now: 'اکنون', mAgo: '{n} دقیقه پیش', hAgo: '{n} ساعت پیش', dAgo: '{n} روز پیش', wAgo: '{n} هفته پیش',
+    syncing: 'در حال همگام‌سازی…', syncErr: 'خطا در فضای ابری', syncOk: 'همگام‌سازی ابری فعال • ', localMode: 'حالت آزمایشی (محلی)', refresh: 'همگام‌سازی',
+    urgent: 'فوری', important: 'مهم', normal: 'عادی', notes: 'یادداشت‌ها', tasks: 'تسک‌ها', settings: 'تنظیمات', untitled: 'بدون عنوان',
+    doneOf: '{a}/{b} انجام‌شده', noResult: 'نتیجه‌ای پیدا نشد', emptyNotes: 'هنوز یادداشتی ندارید. با دکمه + شروع کنید', pinnedH: 'یادداشت‌های سنجاق‌شده', recentH: 'یادداشت‌های اخیر',
+    search: 'جستجو در عنوان، متن یا برچسب‌ها...', fAll: 'همه', fPin: 'پین‌شده', fCl: 'چک‌لیست', stats: '{w} کلمه • {c} کاراکتر',
+    titlePh: 'عنوان یادداشت یا چک‌لیست...', newTag: '+ برچسب جدید', bodyPh: 'بنویسید...', checklist: 'چک‌لیست', clDone: '{a} از {b} تکمیل شد', addItem: 'افزودن مورد جدید (Enter)',
+    unpin: 'برداشتن سنجاق', pinNote: 'سنجاق کردن یادداشت', delNote: 'حذف یادداشت', noTasks: 'کاری برای نمایش نیست', doneDot: 'انجام شد • ',
+    tProg: '{a} از {b} کار انجام شده', tNone: 'هنوز کاری اضافه نکرده‌اید', tLeft: 'تنها {n} گام تا پاکسازی کامل صندوق کارها', tAll: 'همه کارها انجام شد 🎉', tFirst: 'اولین کار را در کادر پایین بنویسید',
+    stDone: 'انجام‌شده', stLeft: 'مانده', addTaskPh: 'افزودن کار جدید...', prio: 'اولویت:', fAllN: 'همه ({n})', fOpen: 'باز ({n})', fDone: 'انجام‌شده ({n})', clrDone: 'حذف انجام‌شده‌ها',
+    sTitle: 'فضای ذخیره‌سازی ابری', sConn: 'متصل به Telegram CloudStorage', sLocal: 'خارج از تلگرام یا نسخه قدیمی تلگرام: ذخیره محلی', sCount: '{a} یادداشت • {b} تسک', sKeys: '{a} از {b} کلید',
+    appear: 'ظاهر', theme: 'پوسته مینی‌اپ', dark: 'تاریک', light: 'روشن', system: 'سیستم', lang: 'زبان', data: 'داده‌ها', wipeT: 'حذف همه داده‌ها', wipeS: 'پاک شدن از Telegram CloudStorage و همه دستگاه‌ها',
+    about: 'درباره مینی‌اپ', a1d: 'یادداشت‌ها و تسک‌ها در فضای ابری حساب تلگرام شما و مخصوص همین ربات ذخیره می‌شوند و روی همه دستگاه‌ها همگام‌اند.', a2t: 'همگام‌سازی بین دستگاه‌ها', a2d: 'با هر بار بازگشت به مینی‌اپ یا زدن دکمه رفرش، آخرین نسخه داده‌ها دریافت می‌شود.',
+    community: 'کامیونیتی و متن‌باز', ghT: 'گیت‌هاب پروژه', ghS: 'سورس‌کد و گزارش مشکلات', devT: 'تلگرام توسعه‌دهنده', devS: 'گزارش باگ‌ها، آپدیت‌ها و پیشنهادها',
+    supH: 'حمایت از توسعه‌دهنده', supP: 'این برنامه رایگان و بدون تبلیغات است. با حمایت شما توسعه ادامه پیدا می‌کند.', 
+    secH: 'امنیت', lockT: 'قفل با رمز ورود', lockS: 'درخواست رمز در هر بار باز شدن برنامه', chgPw: 'تغییر رمز', chgPwS: 'رمز جدید جایگزین رمز فعلی می‌شود', curPw: 'رمز فعلی', newPw: 'رمز جدید', repPw: 'تکرار رمز جدید', save: 'ذخیره', cancel: 'انصراف', disable: 'غیرفعال‌سازی',
+    wrongPw: 'رمز اشتباه است', pwShort: 'رمز باید ۴ تا ۸ رقم (فقط عدد) باشد', pwMismatch: 'تکرار رمز یکسان نیست', noCrypto: 'این محیط از API رمزنگاری پشتیبانی نمی‌کند', locked: 'برنامه قفل است', enterPw: 'رمز ورود را وارد کنید', unlock: 'باز کردن قفل', forgot: 'رمز را فراموش کرده‌اید؟',
+    forgotConf: 'برای حذف رمز، همه یادداشت‌ها و تسک‌ها برای همیشه پاک می‌شوند. ادامه می‌دهید؟', lockNote: 'رمز به‌صورت هش‌شده (با salt) در CloudStorage ذخیره می‌شود و روی همه دستگاه‌ها همگام است. این قفل فقط ورود به برنامه را محدود می‌کند و متن یادداشت‌ها را رمزنگاری نمی‌کند.',
+    copyAddr: 'کپی آدرس', copyMemo: 'کپی ممو', copiedMemo: 'ممو کپی شد', memoWarn: 'برای واریز TON حتماً ممو (Memo/Comment) را وارد کنید، وگرنه واریز شما ثبت نمی‌شود.', netWarn: 'فقط روی شبکه BSC (BEP20) واریز کنید.',
+    loading: 'در حال بارگذاری…', confDel: 'این یادداشت حذف شود؟', copied: 'آدرس کپی شد', confWipe: 'همه یادداشت‌ها و تسک‌ها برای همیشه حذف شوند؟' },
+  en: { now: 'now', mAgo: '{n}m ago', hAgo: '{n}h ago', dAgo: '{n}d ago', wAgo: '{n}w ago',
+    syncing: 'Syncing…', syncErr: 'Cloud storage error', syncOk: 'Cloud sync active • ', localMode: 'Test mode (local)', refresh: 'Sync',
+    urgent: 'Urgent', important: 'Important', normal: 'Normal', notes: 'Notes', tasks: 'Tasks', settings: 'Settings', untitled: 'Untitled',
+    doneOf: '{a}/{b} done', noResult: 'No results found', emptyNotes: 'No notes yet. Tap + to start', pinnedH: 'Pinned notes', recentH: 'Recent notes',
+    search: 'Search title, text or tags...', fAll: 'All', fPin: 'Pinned', fCl: 'Checklist', stats: '{w} words • {c} chars',
+    titlePh: 'Note or checklist title...', newTag: '+ New tag', bodyPh: 'Write something...', checklist: 'Checklist', clDone: '{a} of {b} completed', addItem: 'Add new item (Enter)',
+    unpin: 'Unpin', pinNote: 'Pin note', delNote: 'Delete note', noTasks: 'Nothing to show', doneDot: 'Done • ',
+    tProg: '{a} of {b} tasks done', tNone: 'No tasks added yet', tLeft: 'Only {n} more to clear your list', tAll: 'All tasks done 🎉', tFirst: 'Write your first task below',
+    stDone: 'Done', stLeft: 'Left', addTaskPh: 'Add a new task...', prio: 'Priority:', fAllN: 'All ({n})', fOpen: 'Open ({n})', fDone: 'Done ({n})', clrDone: 'Clear completed',
+    sTitle: 'Cloud storage', sConn: 'Connected to Telegram CloudStorage', sLocal: 'Outside Telegram or old Telegram version: local storage', sCount: '{a} notes • {b} tasks', sKeys: '{a} of {b} keys',
+    appear: 'Appearance', theme: 'Mini App theme', dark: 'Dark', light: 'Light', system: 'System', lang: 'Language', data: 'Data', wipeT: 'Delete all data', wipeS: 'Erased from Telegram CloudStorage and all devices',
+    about: 'About', a1d: 'Your notes and tasks are stored in the cloud of your Telegram account, scoped to this bot, and synced across all your devices.', a2t: 'Multi-device sync', a2d: 'The latest data is fetched every time you return to the app or tap the refresh button.',
+    community: 'Community & open source', ghT: 'Project on GitHub', ghS: 'Source code and issue reports', devT: 'Developer on Telegram', devS: 'Bug reports, updates and suggestions',
+    supH: 'Support the developer', supP: 'This app is free and ad-free. Your support keeps development going.', 
+    secH: 'Security', lockT: 'Password lock', lockS: 'Ask for a password each time the app opens', chgPw: 'Change password', chgPwS: 'Replace the current password', curPw: 'Current password', newPw: 'New password', repPw: 'Repeat new password', save: 'Save', cancel: 'Cancel', disable: 'Disable',
+    wrongPw: 'Wrong password', pwShort: 'Password must be 4 to 8 digits (numbers only)', pwMismatch: 'Passwords do not match', noCrypto: 'This environment does not support the crypto API', locked: 'App locked', enterPw: 'Enter your password', unlock: 'Unlock', forgot: 'Forgot password?',
+    forgotConf: 'To remove the password, all notes and tasks will be permanently deleted. Continue?', lockNote: 'The password is stored as a salted hash in CloudStorage and syncs across your devices. This lock only gates access to the app; it does not encrypt your notes.',
+    copyAddr: 'Copy address', copyMemo: 'Copy memo', copiedMemo: 'Memo copied', memoWarn: 'When sending TON you must include the memo (comment), otherwise your deposit will not be credited.', netWarn: 'Send only on the BSC (BEP20) network.',
+    loading: 'Loading…', confDel: 'Delete this note?', copied: 'Address copied', confWipe: 'Permanently delete all notes and tasks?' }
+};
+const tr = (k, v) => { let x = (TXT[L] && TXT[L][k]) || TXT.fa[k] || k; if (v) for (const i in v) x = x.replace('{' + i + '}', v[i]); return x; };
+const fa = n => Number(n).toLocaleString(L === 'fa' ? 'fa-IR' : 'en-US');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+function ago(ts) {
+  const m = Math.floor((Date.now() - ts) / 6e4);
+  if (m < 1) return tr('now'); if (m < 60) return tr('mAgo', { n: fa(m) });
+  const h = Math.floor(m / 60); if (h < 24) return tr('hAgo', { n: fa(h) });
+  const d = Math.floor(h / 24); return d < 7 ? tr('dAgo', { n: fa(d) }) : tr('wAgo', { n: fa(Math.floor(d / 7)) });
+}
+const conf = (m, cb) => { try { tg.showConfirm(m, ok => ok && cb()); } catch (e) { confirm(m) && cb(); } };
+const say = m => { try { tg.showAlert(m); } catch (e) { alert(m); } };
+function sync(s) {
+  S.st = s; const el = $('#sy'), dot = $('#sd'); if (!el) return;
+  el.textContent = s === 's' ? tr('syncing') : s === 'err' ? tr('syncErr') + (S.em ? ' (' + S.em + ')' : '') : tr('syncOk') + (cloud ? 'Telegram CloudStorage' : tr('localMode'));
+  const rf = $('#rf'); if (rf) rf.classList.toggle('animate-spin', s === 's');
+  if (dot) dot.className = 'w-1.5 h-1.5 rounded-full ' + (s === 'err' ? 'bg-error' : s === 's' ? 'bg-tertiary animate-pulse' : 'bg-secondary animate-pulse');
+}
+const chip = 'shrink-0 px-3.5 py-1.5 rounded-full font-label-md text-label-md flex items-center gap-1 active:scale-95 transition-transform ';
+const on = chip + 'bg-primary text-on-primary shadow-sm', off = chip + 'bg-surface-container text-on-surface-variant';
+const tagc = 'px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm';
+const P = { urgent: ['urgent', 'bg-error-container text-on-error-container'], important: ['important', 'bg-tertiary-container text-on-tertiary-container'], normal: ['normal', 'bg-surface-container-highest text-on-surface-variant'] };
+const saveTasks = () => put('tasks', S.tasks), saveCfg = () => put('cfg', S.cfg);
+
+const LINKS = {
+  github: 'https://github.com/YOUR_USERNAME/YOUR_REPO',
+  dev: 'https://t.me/YOUR_CHANNEL', devName: '@YOUR_CHANNEL',
+  tonAddr: 'UQDBTOXXclOb4m_eMVpQWh4FFBBOdu73dvC4ReV98FV920B8', tonMemo: '7390008906',
+  usdt: '0x24EfC6D23abf35bBFCFBF7FF241c79c84bFD6b83' 
+};
+function pill(rf) {
+  return `<div class="flex justify-center relative px-10"><div class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-secondary-container/20 text-secondary max-w-full"><span class="material-symbols-outlined text-[13px]">verified_user</span><span id="sy" class="font-label-sm text-label-sm tracking-tight text-secondary-fixed-dim truncate"></span><span id="sd" class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse shrink-0"></span></div>${rf ? `<button data-a="sync" aria-label="${tr('refresh')}" class="absolute end-0 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full text-on-surface-variant active:scale-95 active:bg-surface-container-high"><span id="rf" class="material-symbols-outlined text-[22px] ${S.st === 's' ? 'animate-spin' : ''}">refresh</span></button>` : ''}</div>`;
+}
+function nav() {
+  const t = [['notes', 'description', 'notes'], ['tasks', 'check_circle', 'tasks'], ['settings', 'settings', 'settings']];
+  return `<nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-low/85 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.35)]"><div class="flex justify-around items-center h-16 px-space-xs">${t.map(([k, i, l]) => `<a data-a="nav" data-id="${k}" class="flex flex-col items-center justify-center min-w-[64px] h-12 gap-0.5 cursor-pointer ${S.v === k ? 'text-primary font-semibold' : 'text-on-surface-variant'}"><span class="material-symbols-outlined text-[22px]" ${S.v === k ? `style="font-variation-settings:'FILL' 1"` : ''}>${i}</span><span class="font-label-md text-label-md">${tr(l)}</span></a>`).join('')}</div></nav>`;
+}
+const fab = `<div class="fixed bottom-24 end-space-md z-40"><button data-a="new" class="w-14 h-14 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-[0_8px_24px_-4px_rgba(42,171,238,0.4)] active:scale-95 transition-transform"><span class="material-symbols-outlined text-[28px]">add</span></button></div>`;
+
+function card(n, pin) {
+  const cl = n.cl || [], d = cl.filter(x => x.d).length;
+  return `<div data-a="open" data-id="${n.id}" class="relative bg-surface-container rounded-xl p-space-md shadow-sm active:scale-[0.99] transition-all cursor-pointer overflow-hidden">${pin ? '<div class="absolute top-0 start-0 bottom-0 w-1 bg-tertiary"></div>' : ''}<div class="flex flex-col gap-space-xs ${pin ? 'ps-space-xs' : ''}"><div class="flex items-center justify-between gap-2"><h3 class="font-headline-sm text-headline-sm text-on-surface truncate">${esc(n.title || tr('untitled'))}</h3><span class="font-label-sm text-label-sm text-outline shrink-0">${ago(n.u)}</span></div>${n.body ? `<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">${esc(n.body)}</p>` : ''}<div class="flex items-center justify-between pt-1"><div class="flex items-center gap-1.5 flex-wrap">${(n.tags || []).map(t => `<span class="${tagc}">#${esc(t)}</span>`).join('')}</div>${cl.length ? `<div class="flex items-center gap-1 text-outline shrink-0"><span class="material-symbols-outlined text-[17px]">checklist</span><span class="font-label-sm text-label-sm">${tr('doneOf', { a: fa(d), b: fa(cl.length) })}</span></div>` : ''}</div></div></div>`;
+}
+function notesList() {
+  const q = S.q.trim().toLowerCase();
+  let l = S.notes.filter(n => (S.f === 'all' || (S.f === 'pin' && n.pin) || (S.f === 'cl' && (n.cl || []).length)) && (!q || (n.title + ' ' + n.body + ' ' + (n.tags || []).join(' ')).toLowerCase().includes(q)));
+  l.sort((a, b) => b.u - a.u);
+  if (!l.length) return `<div class="flex flex-col items-center gap-2 py-16 text-outline"><span class="material-symbols-outlined text-[48px]">edit_note</span><span class="font-body-md text-body-md">${S.notes.length ? tr('noResult') : tr('emptyNotes')}</span></div>`;
+  const p = l.filter(n => n.pin), r = l.filter(n => !n.pin), sec = (ic, t, c) => `<div class="flex items-center justify-between px-1"><div class="flex items-center gap-1.5 ${c} font-headline-sm text-headline-sm">${ic}<span>${t}</span></div></div>`;
+  return (p.length ? `<div class="flex flex-col gap-space-sm">${sec('<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:\'FILL\' 1">push_pin</span>', tr('pinnedH'), 'text-tertiary')}${p.map(n => card(n, 1)).join('')}</div>` : '') +
+    (r.length ? `<div class="flex flex-col gap-space-sm">${sec('', tr('recentH'), 'text-on-surface')}${r.map(n => card(n)).join('')}</div>` : '');
+}
+function vNotes() {
+  const f = (k, i, l) => `<button data-a="f" data-id="${k}" class="${S.f === k ? on : off}"><span class="material-symbols-outlined text-[16px]">${i}</span>${l}</button>`;
+  return `<div class="relative w-full"><span class="material-symbols-outlined text-[20px] absolute start-space-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">search</span><input data-i="q" value="${esc(S.q)}" placeholder="${tr('search')}" class="w-full h-11 bg-surface-container rounded-xl ps-11 pe-4 text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-high"></div>
+<div class="flex items-center gap-space-xs overflow-x-auto">${f('all', 'all_inclusive', tr('fAll'))}${f('pin', 'push_pin', tr('fPin'))}${f('cl', 'checklist', tr('fCl'))}</div><div id="list" class="flex flex-col gap-space-lg">${notesList()}</div>`;
+}
+
+const stats = n => { const w = (n.body.trim().match(/\S+/g) || []).length; return tr('stats', { w: fa(w), c: fa(n.body.length) }); };
+function vEditor() {
+  const n = S.cur, cl = n.cl, d = cl.filter(x => x.d).length;
+  return `<section class="flex items-center justify-between gap-space-sm pt-space-xs"><div class="flex items-center gap-space-xs min-w-0"><button data-a="back" class="w-9 h-9 -ms-2 flex items-center justify-center text-on-surface rounded-full active:scale-95"><span class="material-symbols-outlined text-[22px]">${L === 'fa' ? 'arrow_forward_ios' : 'arrow_back_ios'}</span></button><div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#4edea3] shrink-0"></div><span id="sy" class="font-label-sm text-label-sm text-secondary truncate"></span><span id="sd"></span></div><span id="wc" class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-space-xs py-0.5 rounded shrink-0">${stats(n)}</span></section>
+<div><input data-i="title" value="${esc(n.title)}" placeholder="${tr('titlePh')}" class="w-full bg-transparent font-headline-lg-mobile text-headline-lg-mobile text-on-surface placeholder:text-outline focus:outline-none mb-space-sm">
+<div class="flex items-center gap-space-xs overflow-x-auto py-space-xs">${n.tags.map((t, i) => `<span data-a="tagd" data-id="${i}" class="px-space-sm py-1 rounded-full bg-surface-container-high text-primary font-label-md text-label-md flex items-center gap-1 shrink-0 cursor-pointer"><span class="material-symbols-outlined text-[14px]">tag</span>${esc(t)}<span class="material-symbols-outlined text-[14px] text-outline">close</span></span>`).join('')}<input data-i="tag" placeholder="${tr('newTag')}" class="w-28 shrink-0 px-space-sm py-1 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md placeholder:text-outline focus:outline-none focus:border-primary border border-transparent"></div></div>
+<textarea data-i="body" placeholder="${tr('bodyPh')}" class="w-full min-h-[160px] bg-transparent text-on-surface placeholder:text-outline focus:outline-none resize-none leading-[1.8]">${esc(n.body)}</textarea>
+<div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-space-md"><div class="flex items-center justify-between"><span class="font-headline-sm text-headline-sm">${tr('checklist')}</span>${cl.length ? `<span class="font-label-sm text-label-sm text-secondary bg-surface-container-highest px-space-xs py-0.5 rounded">${tr('clDone', { a: fa(d), b: fa(cl.length) })}</span>` : ''}</div>
+<div class="flex flex-col gap-space-sm">${cl.map((x, i) => `<div class="flex items-center gap-space-sm"><button data-a="ci" data-id="${i}" class="w-[22px] h-[22px] rounded-md flex items-center justify-center shrink-0 transition-all active:scale-90 ${x.d ? 'bg-secondary' : 'bg-surface-container-high'}"><span class="material-symbols-outlined text-[16px] ${x.d ? 'text-on-secondary' : 'text-transparent'}">check</span></button><input data-i="cit" data-id="${i}" value="${esc(x.t)}" class="flex-1 min-w-0 bg-transparent focus:outline-none transition-colors ${x.d ? 'line-through text-outline' : 'text-on-surface'}"><button data-a="cd" data-id="${i}" class="text-outline active:text-error"><span class="material-symbols-outlined text-[18px]">close</span></button></div>`).join('')}
+<div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px] text-primary">add</span><input data-i="addci" id="addci" placeholder="${tr('addItem')}" class="flex-1 bg-transparent placeholder:text-outline focus:outline-none"></div></div></div>
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-sm"><button data-a="pin" class="flex items-center justify-between py-space-xs"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px] ${n.pin ? 'text-tertiary' : 'text-outline'}" ${n.pin ? `style="font-variation-settings:'FILL' 1"` : ''}>push_pin</span><span>${n.pin ? tr('unpin') : tr('pinNote')}</span></div></button><div class="h-px bg-surface-variant opacity-40"></div><button data-a="del" class="flex items-center gap-space-sm py-space-xs text-error"><span class="material-symbols-outlined text-[20px]">delete</span><span>${tr('delNote')}</span></button></div>`;
+}
+let T;
+const dirty = () => { S.cur.u = Date.now(); clearTimeout(T); sync('s'); T = setTimeout(flush, 700); };
+function flush() {
+  clearTimeout(T); const n = S.cur; if (!n) return;
+  if (!S.notes.includes(n)) S.notes.push(n);
+  put('n' + n.id, n);
+}
+function openNote(n) { S.cur = n; go('editor'); }
+function leave() {
+  const n = S.cur;
+  if (n && !n.title.trim() && !n.body.trim() && !n.cl.length) { clearTimeout(T); S.notes = S.notes.filter(x => x !== n); rm('n' + n.id); } else if (n) flush();
+  S.cur = null; go('notes');
+}
+
+function taskList() {
+  let l = S.tasks.filter(t => S.tf === 'all' || (S.tf === 'open' ? !t.d : t.d));
+  l = l.slice().sort((a, b) => a.d - b.d || (b.t0 - a.t0));
+  if (!l.length) return `<div class="py-12 text-center text-outline font-body-md text-body-md">${tr('noTasks')}</div>`;
+  return l.map(t => `<div class="rounded-xl p-space-md shadow-sm transition-all flex items-start gap-space-sm ${t.d ? 'bg-surface-container-lowest/60 opacity-75' : 'bg-surface-container-low'}"><button data-a="tt" data-id="${t.id}" class="mt-0.5 shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-transform active:scale-90 ${t.d ? 'bg-secondary' : 'bg-surface-variant'}"><span class="material-symbols-outlined text-[18px] ${t.d ? 'text-on-secondary' : 'text-transparent'}">check</span></button><div class="flex-1 min-w-0"><div class="flex items-center justify-between gap-space-xs"><span class="font-headline-sm text-headline-sm tracking-tight ${t.d ? 'line-through text-outline' : 'text-on-surface'}">${esc(t.t)}</span>${t.d ? '' : `<span class="shrink-0 px-2 py-0.5 rounded-full font-label-sm text-label-sm ${P[t.p][1]}">${tr(P[t.p][0])}</span>`}</div><div class="mt-1 font-label-sm text-label-sm text-outline">${t.d ? tr('doneDot') : ''}${ago(t.d || t.t0)}</div></div><button data-a="td" data-id="${t.id}" class="text-outline active:text-error"><span class="material-symbols-outlined text-[18px]">close</span></button></div>`).join('');
+}
+function vTasks() {
+  const all = S.tasks.length, dn = S.tasks.filter(t => t.d).length, pct = all ? Math.round(dn / all * 100) : 0, ur = S.tasks.filter(t => !t.d && t.p === 'urgent').length;
+  const st = (l, v, c) => `<div class="rounded-lg bg-surface-container-low py-1.5 px-2"><span class="font-label-sm text-label-sm text-on-surface-variant block">${l}</span><span class="font-headline-sm text-headline-sm ${c}">${fa(v)}</span></div>`;
+  const f = (k, l) => `<button data-a="tf" data-id="${k}" class="${S.tf === k ? on : off} whitespace-nowrap">${l}</button>`;
+  return `<div class="rounded-xl bg-surface-container-high p-space-md shadow-md"><div class="flex items-center justify-between"><div class="min-w-0"><h2 class="font-headline-md text-headline-md text-on-surface">${all ? tr('tProg', { a: fa(dn), b: fa(all) }) : tr('tNone')}</h2><p class="font-body-sm text-body-sm text-on-surface-variant">${all && dn < all ? tr('tLeft', { n: fa(all - dn) }) : all ? tr('tAll') : tr('tFirst')}</p></div><div class="relative w-16 h-16 shrink-0 flex items-center justify-center"><svg class="w-full h-full -rotate-90" viewBox="0 0 36 36"><path class="text-surface-container-highest" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831" fill="none" stroke="currentColor" stroke-width="3.5"/><path class="text-secondary transition-all duration-700" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831" fill="none" stroke="currentColor" stroke-dasharray="${pct},100" stroke-linecap="round" stroke-width="3.5"/></svg><span class="absolute font-label-md text-label-md">${fa(pct)}${L === 'fa' ? '٪' : '%'}</span></div></div><div class="mt-space-md grid grid-cols-3 gap-space-xs text-center">${st(tr('stDone'), dn, 'text-secondary')}${st(tr('stLeft'), all - dn, 'text-tertiary')}${st(tr('urgent'), ur, 'text-error')}</div></div>
+<div class="rounded-xl bg-surface-container p-space-sm shadow-sm flex flex-col gap-y-space-sm"><div class="flex items-center gap-space-sm px-1"><span class="material-symbols-outlined text-primary text-[20px]">add_task</span><input id="nt" data-i="nt" value="${esc(S.draft)}" placeholder="${tr('addTaskPh')}" class="w-full bg-transparent placeholder:text-outline focus:outline-none"><button data-a="addt" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 active:scale-95"><span class="material-symbols-outlined text-[18px]">arrow_downward</span></button></div><div class="flex items-center gap-1.5 px-1"><span class="font-label-sm text-label-sm text-on-surface-variant me-1">${tr('prio')}</span>${Object.keys(P).map(k => `<button data-a="pri" data-id="${k}" class="px-2 py-0.5 rounded-full font-label-sm text-label-sm transition-opacity ${S.pr === k ? P[k][1] : 'bg-surface-container-highest text-on-surface-variant opacity-70'}">${tr(P[k][0])}</button>`).join('')}</div></div>
+<div class="flex items-center gap-space-xs overflow-x-auto">${f('all', tr('fAllN', { n: fa(all) }))}${f('open', tr('fOpen', { n: fa(all - dn) }))}${f('done', tr('fDone', { n: fa(dn) }))}</div>
+<div id="tl" class="flex flex-col gap-y-space-sm">${taskList()}</div>
+${dn ? `<button data-a="clr" class="self-start flex items-center gap-1.5 text-on-surface-variant active:text-error px-1"><span class="material-symbols-outlined text-[18px]">delete_sweep</span><span class="font-label-md text-label-md">${tr('clrDone')}</span></button>` : ''}`;
+}
+
+const norm = v => String(v).replace(/[\u06F0-\u06F9]/g, c => c.charCodeAt(0) - 0x6F0).replace(/[\u0660-\u0669]/g, c => c.charCodeAt(0) - 0x660).replace(/\D/g, '').slice(0, 8);
+const b64 = u => btoa(String.fromCharCode(...new Uint8Array(u))), unb64 = x => Uint8Array.from(atob(x), c => c.charCodeAt(0));
+async function hashPw(pw, salt) {
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  return b64(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: 150000 }, k, 256));
+}
+async function mkLock(pw) { const salt = crypto.getRandomValues(new Uint8Array(16)); return { s: b64(salt), h: await hashPw(norm(pw), salt) }; }
+async function chk(pw) { const l = S.cfg.lock; return !!l && (await hashPw(norm(pw), unb64(l.s))) === l.h; }
+function vLock() {
+  return `<div class="min-h-[80dvh] flex flex-col items-center justify-center gap-space-lg text-center"><div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center text-primary shadow-md"><span class="material-symbols-outlined text-[40px]">lock</span></div><div><h1 class="font-headline-md text-headline-md">${tr('locked')}</h1><p class="font-body-sm text-body-sm text-on-surface-variant">${tr('enterPw')}</p></div><input id="lpw" data-i="lpw" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" dir="ltr" autocomplete="off" placeholder="••••••" class="w-full max-w-xs h-12 bg-surface-container rounded-xl px-4 text-center text-on-surface placeholder:text-outline focus:outline-none border border-transparent focus:border-primary"><p id="le" class="font-label-md text-label-md text-error min-h-[18px]"></p><button data-a="unlock" class="w-full max-w-xs py-3 rounded-xl bg-primary-container text-on-primary font-headline-sm text-headline-sm active:scale-[0.98] transition-transform">${tr('unlock')}</button><button data-a="forgot" class="font-label-md text-label-md text-primary">${tr('forgot')}</button></div>`;
+}
+async function wipeAll() {
+  try {
+    const ks = await CS.keys(); for (let i = 0; i < ks.length; i += 40) await CS.del(ks.slice(i, i + 40));
+    for (const k in cc) delete cc[k]; S.notes = []; S.tasks = []; S.cfg = {}; S.unlocked = true; S.pf = null; hap('medium'); render();
+  } catch (e) { S.em = String((e && e.message) || e); sync('err'); }
+}
+
+function vSettings() {
+  const used = Object.values(cc).reduce((a, b) => a + b, 0), pct = Math.min(100, used / 1024 * 100), th = S.cfg.theme || 'dark';
+  const row = (ic, c, t, sub, a) => `<button data-a="${a}" class="flex items-center justify-between p-space-md w-full text-start active:bg-surface-container-high/50"><div class="flex items-center gap-space-sm min-w-0"><div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center ${c} shrink-0"><span class="material-symbols-outlined text-[20px]">${ic}</span></div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium truncate ${c === 'text-error' ? 'text-error' : 'text-on-surface'}">${t}</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">${sub}</span></div></div><span class="material-symbols-outlined text-[20px] text-on-surface-variant">${L === 'fa' ? 'chevron_left' : 'chevron_right'}</span></button>`;
+  const ext = (ic, bg, t, sub, id, tag) => `<button data-a="link" data-id="${id}" class="flex items-center justify-between p-space-md rounded-xl bg-surface-container active:bg-surface-container-high shadow-sm w-full text-start"><div class="flex items-center gap-space-sm min-w-0"><div class="w-10 h-10 rounded-lg ${bg} flex items-center justify-center shrink-0">${ic}</div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-semibold truncate">${t}</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">${sub}</span></div></div><div class="flex items-center gap-1 text-primary shrink-0"><span class="font-label-sm text-label-sm" dir="ltr">${tag}</span><span class="material-symbols-outlined text-[18px]">open_in_new</span></div></button>`;
+  const info = (ic, c, t, sub) => `<div class="flex items-start gap-space-sm bg-surface-container-lowest p-space-sm rounded-lg"><span class="material-symbols-outlined text-[20px] ${c} shrink-0 mt-0.5">${ic}</span><div class="flex flex-col"><span class="font-body-md text-body-md font-semibold">${t}</span><span class="font-body-sm text-body-sm text-on-surface-variant">${sub}</span></div></div>`;
+  const hd = (ic, t, c) => `<div class="flex items-center gap-space-xs px-space-xs"><span class="material-symbols-outlined text-[18px] ${c || 'text-primary'}">${ic}</span><h2 class="font-headline-sm text-headline-sm">${t}</h2></div>`;
+  const addr = (title, badge, val, id) => `<div class="flex items-center justify-between"><span class="font-body-md text-body-md font-semibold">${title}</span><span class="font-label-sm text-label-sm text-primary px-2 py-0.5 rounded-full bg-primary/10" dir="ltr">${badge}</span></div><div dir="ltr" class="font-mono text-[12px] leading-5 break-all text-on-surface-variant select-all">${esc(val)}</div><button data-a="copy" data-id="${id}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-surface-container-highest text-on-surface active:scale-[0.98]"><span class="material-symbols-outlined text-[18px] text-primary">content_copy</span><span class="font-label-md text-label-md">${tr('copyAddr')}</span></button>`;
+  const fld = (id, ph) => `<input id="${id}" data-i="pw" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" dir="ltr" autocomplete="off" placeholder="${ph}" class="w-full h-11 bg-surface-container-lowest rounded-lg px-3 text-on-surface placeholder:text-outline focus:outline-none border border-transparent focus:border-primary">`;
+  const lk = !!S.cfg.lock, pf = S.pf;
+  const form = pf ? `<div class="p-space-md flex flex-col gap-space-sm bg-surface-container-low">${pf !== 'set' ? fld('pw0', tr('curPw')) : ''}${pf !== 'off' ? fld('pw1', tr('newPw')) + fld('pw2', tr('repPw')) : ''}<p id="pe" class="font-label-md text-label-md text-error min-h-[18px]"></p><div class="flex gap-space-sm"><button data-a="pwsave" class="flex-1 py-2.5 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md active:scale-[0.98]">${pf === 'off' ? tr('disable') : tr('save')}</button><button data-a="pwcancel" class="px-space-md py-2.5 rounded-lg bg-surface-container-highest text-on-surface-variant font-label-md text-label-md">${tr('cancel')}</button></div></div>` : '';
+  const secBox = `<div class="bg-surface-container rounded-xl overflow-hidden flex flex-col"><div class="flex items-center justify-between p-space-md"><div class="flex items-center gap-space-sm min-w-0"><div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined text-[20px]">pin</span></div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium truncate">${tr('lockT')}</span><span class="font-body-sm text-body-sm text-on-surface-variant">${tr('lockS')}</span></div></div><button data-a="lockt" class="w-11 h-6 rounded-full p-1 flex items-center shrink-0 transition-colors ${lk ? 'bg-primary-container justify-end' : 'bg-surface-container-highest justify-start'}"><span class="w-4 h-4 rounded-full ${lk ? 'bg-white' : 'bg-outline'}"></span></button></div>${lk && !pf ? `<div class="h-px bg-surface-container-high mx-space-md"></div>${row('key', 'text-primary', tr('chgPw'), tr('chgPwS'), 'pwchg')}` : ''}${form}</div><p class="font-body-sm text-body-sm text-on-surface-variant px-space-xs">${tr('lockNote')}</p>`;
+  const gh = '<svg class="w-5 h-5 fill-current text-on-surface" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>';
+  return `<div class="bg-surface-container-low p-space-md rounded-xl shadow-md flex flex-col gap-space-sm"><div class="flex items-center gap-space-sm"><div class="relative w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[26px]">shield_lock</span><span class="absolute bottom-0 start-0 w-3 h-3 rounded-full bg-secondary shadow-[0_0_8px_#4edea3]"></span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm">${tr('sTitle')}</span><span class="font-body-sm text-body-sm text-on-surface-variant">${cloud ? tr('sConn') : tr('sLocal')}</span></div></div><div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant"><span>${tr('sCount', { a: fa(S.notes.length), b: fa(S.tasks.length) })}</span><span>${tr('sKeys', { a: fa(used), b: fa(1024) })}</span></div><div class="w-full h-2 rounded-full bg-surface-container-lowest overflow-hidden"><div class="h-full ${L === 'fa' ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-primary via-secondary to-secondary-container rounded-full" style="width:${Math.max(pct, 1)}%"></div></div></div>
+<div class="flex flex-col gap-space-sm">${hd('palette', tr('appear'))}<div class="bg-surface-container p-space-md rounded-xl flex flex-col gap-space-xs"><span class="font-label-md text-label-md text-on-surface-variant">${tr('theme')}</span><div class="grid grid-cols-3 gap-space-xs bg-surface-container-lowest p-1 rounded-lg">${[['dark', 'dark_mode'], ['light', 'light_mode'], ['system', 'devices']].map(([k, i]) => `<button data-a="theme" data-id="${k}" class="flex flex-col items-center py-2 rounded-md transition-all ${th === k ? 'bg-surface-container-high text-primary shadow-sm' : 'text-on-surface-variant'}"><span class="material-symbols-outlined text-[20px] mb-0.5">${i}</span><span class="font-label-sm text-label-sm">${tr(k)}</span></button>`).join('')}</div></div><div class="bg-surface-container p-space-md rounded-xl flex flex-col gap-space-xs"><span class="font-label-md text-label-md text-on-surface-variant">${tr('lang')}</span><div class="flex items-center gap-space-sm">${[['fa', 'فا', 'فارسی'], ['en', 'EN', 'English']].map(([k, b, n]) => `<button data-a="lang" data-id="${k}" class="flex-1 flex items-center justify-between p-space-sm rounded-lg transition-colors ${L === k ? 'bg-surface-container-high text-on-surface' : 'bg-surface-container-lowest text-on-surface-variant'}"><div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full ${L === k ? 'bg-secondary-container/30 text-secondary' : 'bg-surface-container-high'} flex items-center justify-center text-[11px] font-medium">${b}</span><span class="font-body-md text-body-md">${n}</span></div><span class="material-symbols-outlined text-[18px] text-secondary ${L === k ? '' : 'opacity-0'}">check_circle</span></button>`).join('')}</div></div></div>
+<div class="flex flex-col gap-space-sm">${hd('lock', tr('secH'))}${secBox}</div>
+<div class="flex flex-col gap-space-sm">${hd('enhanced_encryption', tr('data'))}<div class="bg-surface-container rounded-xl overflow-hidden flex flex-col">${row('delete_forever', 'text-error', tr('wipeT'), tr('wipeS'), 'wipe')}</div></div>
+<div class="flex flex-col gap-space-sm">${hd('info', tr('about'))}<div class="bg-surface-container p-space-md rounded-xl flex flex-col gap-space-sm">${info('cloud', 'text-secondary', 'Telegram CloudStorage', tr('a1d'))}${info('sync', 'text-tertiary', tr('a2t'), tr('a2d'))}</div></div>
+<div class="flex flex-col gap-space-sm">${hd('terminal', tr('community'))}${ext(gh, 'bg-surface-container-highest', tr('ghT'), tr('ghS'), 'github', 'GitHub')}${ext('<span class="material-symbols-outlined text-[22px] text-primary-container">send</span>', 'bg-primary-container/20', tr('devT'), tr('devS'), 'dev', esc(LINKS.devName))}</div>
+<div class="flex flex-col gap-space-sm">${hd('favorite', tr('supH'), 'text-tertiary')}<div class="bg-surface-container p-space-md rounded-xl flex flex-col gap-space-md shadow-sm"><p class="font-body-sm text-body-sm text-on-surface-variant">${tr('supP')}</p><div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col gap-space-xs">${addr('Toncoin (TON)', 'TON', LINKS.tonAddr, 'tonAddr')}<div class="rounded-lg bg-tertiary/10 p-space-sm flex flex-col gap-space-xs"><div class="flex items-center justify-between gap-2"><span class="font-label-md text-label-md text-tertiary">Memo</span><span dir="ltr" class="font-mono text-[14px] text-on-surface select-all">${esc(LINKS.tonMemo)}</span></div><p class="font-label-sm text-label-sm text-tertiary">${tr('memoWarn')}</p><button data-a="copy" data-id="tonMemo" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-surface-container-highest text-on-surface active:scale-[0.98]"><span class="material-symbols-outlined text-[18px] text-tertiary">content_copy</span><span class="font-label-md text-label-md">${tr('copyMemo')}</span></button></div></div><div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col gap-space-xs">${addr('USDT (Tether)', 'BSC • BEP20', LINKS.usdt, 'usdt')}<p class="font-label-sm text-label-sm text-tertiary">${tr('netWarn')}</p></div></div></div>
+<div class="flex flex-col items-center pt-space-xs pb-space-lg gap-1"><div class="inline-flex items-center gap-1.5 text-on-surface-variant/70 font-label-sm text-label-sm" dir="ltr"><span class="material-symbols-outlined text-[14px]">cloud_done</span>v1.1.0 • ${tg ? esc(tg.platform) + ' ' + esc(tg.version) : 'browser'}</div></div>`;
+}
+
+const V = { notes: vNotes, tasks: vTasks, settings: vSettings, editor: vEditor };
+function render() {
+  const lk = !!(S.ready && S.cfg.lock && !S.unlocked), ed = S.v === 'editor'; document.title = tr('notes');
+  $('#app').innerHTML = `<main class="flex-1 flex flex-col w-full pb-28" style="padding-top:calc(env(safe-area-inset-top,0px) + 12px)"><div class="flex flex-col w-full px-space-md ${ed ? 'gap-space-md' : 'gap-space-lg'}">${ed || lk ? '' : pill(S.v !== 'settings')}${lk ? vLock() : S.ready ? V[S.v]() : `<div class="py-24 text-center text-outline">${tr('loading')}</div>`}</div></main>` + (S.v === 'notes' && !lk ? fab : '') + (ed || lk ? '' : nav());
+  sync(S.st);
+  if (lk) { const i = $('#lpw'); i && i.focus(); }
+  const ta = $('textarea'); if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+}
+function go(v) {
+  S.v = v; render(); window.scrollTo(0, 0);
+  try { v === 'editor' ? tg.BackButton.show() : tg.BackButton.hide(); } catch (e) {}
+}
+const newNote = () => ({ id: uid(), title: '', body: '', tags: [], cl: [], pin: false, u: Date.now() });
+const tk = id => S.tasks.find(t => t.id === id);
+const A = {
+  nav: id => { hap(); S.pf = null; go(id); },
+  f: id => { S.f = id; render(); },
+  tf: id => { S.tf = id; S.draft = ($('#nt') || {}).value || ''; render(); },
+  new: () => { hap(); openNote(newNote()); },
+  open: id => openNote(S.notes.find(n => n.id === id)),
+  back: () => leave(),
+  pin: () => { S.cur.pin = !S.cur.pin; hap(); dirty(); render(); },
+  del: () => conf(tr('confDel'), () => { const n = S.cur; S.notes = S.notes.filter(x => x !== n); rm('n' + n.id); S.cur = null; hap('medium'); go('notes'); }),
+  tagd: id => { S.cur.tags.splice(+id, 1); dirty(); render(); },
+  ci: id => { const x = S.cur.cl[+id]; x.d = !x.d; hap(); dirty(); render(); },
+  cd: id => { S.cur.cl.splice(+id, 1); dirty(); render(); },
+  tt: id => { const t = tk(id); t.d = t.d ? 0 : Date.now(); hap(); saveTasks(); S.draft = ($('#nt') || {}).value || ''; render(); },
+  td: id => { S.tasks = S.tasks.filter(t => t.id !== id); saveTasks(); S.draft = ($('#nt') || {}).value || ''; render(); },
+  pri: id => { S.pr = id; S.draft = ($('#nt') || {}).value || ''; render(); },
+  addt: () => addTask(),
+  clr: () => { S.tasks = S.tasks.filter(t => !t.d); saveTasks(); render(); },
+  theme: id => { S.cfg.theme = id; try { localStorage.setItem('theme', id); } catch (e) {} applyTheme(); saveCfg(); hap(); render(); },
+  link: id => { const u = LINKS[id]; try { id === 'dev' ? tg.openTelegramLink(u) : tg.openLink(u); } catch (e) { window.open(u, '_blank'); } },
+  copy: async id => { const v = LINKS[id]; try { await navigator.clipboard.writeText(v); } catch (e) { const t = document.createElement('textarea'); t.value = v; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); } hap(); say(tr(id === 'tonMemo' ? 'copiedMemo' : 'copied')); },
+  sync: async () => { hap(); if (S.v === 'tasks') S.draft = ($('#nt') || {}).value || ''; sync('s'); try { await Promise.all(Object.values(Q)); await load(); S.fail = false; S.em = ''; sync('ok'); render(); } catch (e) { S.em = String((e && e.message) || e); sync('err'); } },
+  lang: id => { try { localStorage.setItem('lang', id); } catch (e) {} applyLang(id); S.cfg.lang = id; saveCfg(); hap(); render(); },
+  wipe: () => conf(tr('confWipe'), wipeAll),
+  lockt: () => { S.pf = S.pf ? null : (S.cfg.lock ? 'off' : 'set'); render(); },
+  pwchg: () => { S.pf = 'change'; render(); },
+  pwcancel: () => { S.pf = null; render(); },
+  pwsave: async () => {
+    const v = id => (($('#' + id) || {}).value || ''), e = m => { const p = $('#pe'); if (p) p.textContent = m; }, f = S.pf;
+    if (!(window.crypto && crypto.subtle)) return e(tr('noCrypto'));
+    try {
+      if (f !== 'set' && !(await chk(v('pw0')))) return e(tr('wrongPw'));
+      if (f === 'off') delete S.cfg.lock;
+      else { const a = norm(v('pw1')); if (a.length < 4) return e(tr('pwShort')); if (a !== norm(v('pw2'))) return e(tr('pwMismatch')); S.cfg.lock = await mkLock(a); S.unlocked = true; }
+    } catch (x) { return e(String((x && x.message) || x)); }
+    S.pf = null; saveCfg(); hap(); render();
+  },
+  unlock: async () => {
+    const i = $('#lpw'), e = $('#le'); if (!i) return;
+    try { if (await chk(i.value)) { S.unlocked = true; hap(); render(); return; } } catch (x) { e.textContent = tr('noCrypto'); return; }
+    e.textContent = tr('wrongPw'); i.value = ''; hap('medium'); i.focus();
+  },
+  forgot: () => conf(tr('forgotConf'), wipeAll)
+};
+function addTask() {
+  const el = $('#nt'), v = el.value.trim(); if (!v) return;
+  S.tasks.push({ id: uid(), t: v, p: S.pr, d: 0, t0: Date.now() }); S.draft = ''; hap(); saveTasks(); render(); const n = $('#nt'); n && n.focus();
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b && A[b.dataset.a]) A[b.dataset.a](b.dataset.id, b); });
+document.addEventListener('input', e => {
+  const el = e.target, k = el.dataset.i, n = S.cur; if (!k) return;
+  if (k === 'q') { S.q = el.value; $('#list').innerHTML = notesList(); }
+  else if (k === 'title') { n.title = el.value; dirty(); }
+  else if (k === 'body') { n.body = el.value; el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; $('#wc').textContent = stats(n); dirty(); }
+  else if (k === 'cit') { n.cl[+el.dataset.id].t = el.value; dirty(); }
+  else if (k === 'pw' || k === 'lpw') { const v = norm(el.value); if (v !== el.value) el.value = v; }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing) return; const el = e.target, k = el.dataset.i, v = el.value.trim();
+  if (k === 'nt') addTask();
+  else if (k === 'lpw') A.unlock();
+  else if (k === 'pw') A.pwsave();
+  else if (k === 'tag' && v) { if (!S.cur.tags.includes(v)) S.cur.tags.push(v); dirty(); render(); }
+  else if (k === 'addci' && v) { S.cur.cl.push({ t: v, d: 0 }); dirty(); render(); $('#addci').focus(); }
+});
+try { tg.BackButton.onClick(() => S.v === 'editor' && leave()); } catch (e) {}
+document.addEventListener('visibilitychange', async () => { if (!document.hidden && S.ready && S.v !== 'editor') { try { await load(); render(); } catch (e) {} } });
+
+(async () => { render(); try { await load(); } catch (e) { S.fail = true; S.em = String((e && e.message) || e); S.st = 'err'; } S.ready = true; render(); })();
+</script>
+</body>
+</html>
